@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SSS",
+    "SLS",
+    "AOA"
+  ],
+  "key": {
+    "L": {
+      "item": "minecraft:lodestone"
+    },
+    "A": {
+      "item": "minecraft:polished_andesite_slab"
+    },
+    "O": {
+      "item": "minecraft:crying_obsidian"
+    },
+    "S": {
+      "item": "minecraft:polished_basalt"
+    }
+  },
+  "result": {
+    "item": "riftbound:waystone_stone_block"
+  }
+}

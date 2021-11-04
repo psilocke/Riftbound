@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QRQ",
+    "CEC",
+    "QRQ"
+  ],
+  "key": {
+    "E": {
+      "item": "riftbound:everlasting_ender_pearl"
+    },
+    "Q": {
+      "item": "minecraft:quartz"
+    },
+    "C": {
+      "item": "minecraft:chorus_fruit"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "item": "riftbound:rift_pearl"
+  }
+}

@@ -14,8 +14,7 @@ loaderVersion="[36,)" #mandatory This is typically bumped every Minecraft versio
 license="All rights reserved"
 
 # A URL to refer people to when problems occur with this mod
-issueTrackerURL="https://github.com/GenotypeNull/Monoliths-1.16.5/issues" #optional
-
+#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 
@@ -25,7 +24,7 @@ modId="riftbound" #mandatory
 # The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
 # ${file.jarVersion} will substitute the value of the Implementation-Version as read from the mod's JAR file metadata
 # see the associated build.gradle script for how to populate this completely automatically during a build
-version="${file.jarVersion}-0.0.1" #mandatory
+version="${file.jarVersion}-0.1.0" #mandatory
 
 # A display name for the mod
 displayName="Riftbound" #mandatory
@@ -37,32 +36,27 @@ displayName="Riftbound" #mandatory
 #displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
 
 # A file name (in the root of the mod JAR) containing a logo for display
-#logoFile="riftbound.png" #optional
+logoFile="examplemod.png" #optional
 
 # A text field displayed in the mod UI
-credits="Friends and family for putting up with me frustrations" #optional
+credits="Everyone who put up with my nonsense" #optional
 
 # A text field displayed in the mod UI
 authors="Psilocke" #optional
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-This mod adds in various blocks and tools used for remote travel and interaction.
+This mod adds in various blocks and items for teleporting or sending signals between remote locations.
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.Riftbound]] #optional
-    # the modid of the dependency
+[[dependencies.riftbound]] #optional
     modId="forge" #mandatory
-    # Does this dependency have to exist - if not, ordering below must be specified
     mandatory=true #mandatory
-    # The version range of the dependency
     versionRange="[36,)" #mandatory
-    # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
     ordering="NONE"
-    # Side this dependency is applied on - BOTH, CLIENT or SERVER
     side="BOTH"
 # Here's another dependency
-[[dependencies.Riftbound]]
+[[dependencies.riftbound]]
     modId="minecraft"
     mandatory=true
     versionRange="[1.16.5,1.17)"

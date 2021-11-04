@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "half=upper": {
+      "model": "riftbound:block/waystone/waystone_stone_block_dummy"
+    },
+    "half=lower,slot_filled=false": {
+      "model": "riftbound:block/waystone/waystone_stone_block_empty"
+    },
+    "half=lower,slot_filled=true": {
+      "model": "riftbound:block/waystone/waystone_stone_block_filled"
+    }
+  }
+}
