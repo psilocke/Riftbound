@@ -135,6 +135,12 @@ public class WaystoneCore extends MonolithCore implements IWaterLoggable, ITileE
 	}
 	
 	
+	
+	@Override
+	public boolean hasTileEntity(BlockState state) {
+		return super.hasTileEntity(state);
+	}
+
 	//model and lighting methods
 	@Override
     public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
@@ -171,6 +177,7 @@ public class WaystoneCore extends MonolithCore implements IWaterLoggable, ITileE
 
 		DoubleBlockHalf doubleblockhalf = state1.getValue(HALF);
 		if (direction.getAxis() == Direction.Axis.Y && doubleblockhalf == DoubleBlockHalf.LOWER == (direction == Direction.UP)) {
+			iworld.setBlock(pos.above(), state2, 0);
 			return state2.is(this) && state2.getValue(HALF) != doubleblockhalf ? state1.setValue(POWERED, state2.getValue(POWERED)).setValue(SLOT_FILLED, state2.getValue(SLOT_FILLED)) : Blocks.AIR.defaultBlockState();
 		} else {
 			return doubleblockhalf == DoubleBlockHalf.LOWER && direction == Direction.DOWN && !state1.canSurvive(iworld, pos) ? Blocks.AIR.defaultBlockState() : super.updateShape(state1, direction, state2, iworld, pos, directionPos);
@@ -200,10 +207,15 @@ public class WaystoneCore extends MonolithCore implements IWaterLoggable, ITileE
 	}
 	
 	
-	
+	//interaction methods
 	
 	@Override
 	public ActionResultType use(BlockState state, World world, BlockPos clickedPos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
+		if(state.getValue(HALF) == DoubleBlockHalf.UPPER) {
+			clickedPos = clickedPos.below();
+			state = world.getBlockState(clickedPos);
+		}
+		
 		ActionResultType result = super.use(state, world, clickedPos, player, hand, rayTrace);
 		
 		if(result == ActionResultType.PASS) {
