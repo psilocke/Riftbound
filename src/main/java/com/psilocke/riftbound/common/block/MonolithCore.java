@@ -38,7 +38,6 @@ public class MonolithCore extends Block {
 
 	public MonolithCore(Properties p_i48440_1_) {
 		super(p_i48440_1_);
-		// TODO Auto-generated constructor stub
 	}
 	
 	public TileEntity newBlockEntity(IBlockReader reader) {
