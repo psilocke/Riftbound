@@ -31,6 +31,7 @@ public class MonolithCore extends Block {
 	protected final static int UNSLOTTED = 1;
 	protected final static int INACTIVE = 2;
 	protected final static int ACTIVE = 3;
+	protected final static int LINK = 4;
 	protected final static int FAIL = -1;
 
     public final static BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -65,16 +66,18 @@ public class MonolithCore extends Block {
 		if(!world.isClientSide) {
 			switch(interactWith(world,state,pos,player)) {
 				case ACTIVE:
-					return ActionResultType.PASS;
+					return ActionResultType.SUCCESS;
 				case INACTIVE:
 					player.sendMessage(new StringTextComponent("Deactivated."), Util.NIL_UUID);
 					return ActionResultType.FAIL;
 				case SLOTTED:
 					setSlot(world, pos, (MonolithCoreTileEntity)world.getBlockEntity(pos), player);
-					return ActionResultType.FAIL;
+					return ActionResultType.CONSUME;
 				case UNSLOTTED:
 					player.sendMessage(new StringTextComponent("Insert a Rift Pearl to prime."), Util.NIL_UUID);
 					return ActionResultType.FAIL;
+				case LINK:
+					return ActionResultType.PASS;
 			}
 		}
 		if(world.isClientSide) {
@@ -86,7 +89,6 @@ public class MonolithCore extends Block {
 	protected int interactWith(World world, BlockState state, BlockPos clickedPos, PlayerEntity player) {
 		TileEntity tileEntity = world.getBlockEntity(clickedPos);
 		if (tileEntity != null && tileEntity instanceof MonolithCoreTileEntity) {
-			MonolithCoreTileEntity monolith = (MonolithCoreTileEntity)tileEntity;
 			boolean playerHoldingPearl = player.getMainHandItem().getItem() == ModItems.RIFT_PEARL.get();
 			if(state.getValue(SLOT_FILLED)) {
 				if(player.isCrouching()) {
@@ -97,7 +99,7 @@ public class MonolithCore extends Block {
 					}else {
 						return INACTIVE;
 					}
-				}
+				}else return LINK;
 			}else {
 				if(!playerHoldingPearl) {
 					return UNSLOTTED;
@@ -143,7 +145,7 @@ public class MonolithCore extends Block {
 				MonolithCoreTileEntity monolith = (MonolithCoreTileEntity) tileentity;
 				if(world.addFreshEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), monolith.getSlot()))) {
 					player.sendMessage(new StringTextComponent("Rift Pearl Ejected."), Util.NIL_UUID);
-					monolith.clearContent();
+					//monolith.clearContent();
 					world.setBlockAndUpdate(pos, world.getBlockState(pos).setValue(SLOT_FILLED, false));
 				}
 			}

@@ -1,5 +1,9 @@
 package com.psilocke.riftbound.common.block.waystone;
 
+import java.util.Optional;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.psilocke.riftbound.build.ModItems;
 import com.psilocke.riftbound.common.block.MonolithCore;
 import com.psilocke.riftbound.common.item.RiftPearlItem;
@@ -12,6 +16,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.IWaterLoggable;
 import net.minecraft.block.material.PushReaction;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -29,17 +34,26 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.TransportationHelper;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.ICollisionReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLClientLaunchProvider;
+import net.minecraftforge.fml.loading.FMLCommonLaunchHandler;
 
 @SuppressWarnings("deprecation")
 public class WaystoneCore extends MonolithCore implements IWaterLoggable, ITileEntityProvider{
@@ -62,6 +76,8 @@ public class WaystoneCore extends MonolithCore implements IWaterLoggable, ITileE
     //block properties
     public final static EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
     public final static BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    private static final ImmutableList<Vector3i> RESPAWN_HORIZONTAL_OFFSETS = ImmutableList.of(new Vector3i(0, 0, -1), new Vector3i(-1, 0, 0), new Vector3i(0, 0, 1), new Vector3i(1, 0, 0), new Vector3i(-1, 0, -1), new Vector3i(1, 0, -1), new Vector3i(-1, 0, 1), new Vector3i(1, 0, 1));
+    private static final ImmutableList<Vector3i> RESPAWN_OFFSETS = (new Builder<Vector3i>()).addAll(RESPAWN_HORIZONTAL_OFFSETS).addAll(RESPAWN_HORIZONTAL_OFFSETS.stream().map(Vector3i::below).iterator()).addAll(RESPAWN_HORIZONTAL_OFFSETS.stream().map(Vector3i::above).iterator()).build();
 	
 	public WaystoneCore(Properties properties) {
 		super(properties);
@@ -238,4 +254,24 @@ public class WaystoneCore extends MonolithCore implements IWaterLoggable, ITileE
 			}else player.sendMessage(new StringTextComponent("Cannot Teleport Between Dimensions."), Util.NIL_UUID);
 		} else player.sendMessage(new StringTextComponent("Not Linked."), Util.NIL_UUID);
 	}
+	
+	public static Optional<Vector3d> findStandUpPosition(EntityType<?> entity, ICollisionReader reader, BlockPos pos) {
+		Optional<Vector3d> optional = findStandUpPosition(entity, reader, pos, true);
+		return optional.isPresent() ? optional : findStandUpPosition(entity, reader, pos, false);
+	}
+
+	private static Optional<Vector3d> findStandUpPosition(EntityType<?> entity, ICollisionReader reader, BlockPos pos, boolean bool) {
+		BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
+
+		for (Vector3i vector3i : RESPAWN_OFFSETS) {
+			blockpos$mutable.set(pos).move(vector3i);
+			Vector3d vector3d = TransportationHelper.findSafeDismountLocation(entity, reader, blockpos$mutable, bool);
+			if (vector3d != null) {
+				return Optional.of(vector3d);
+			}
+		}
+
+		return Optional.empty();
+	}
+
 }
