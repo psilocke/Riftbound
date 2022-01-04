@@ -1,10 +1,6 @@
 package com.psilocke.riftbound.common.item;
 
-import java.util.Optional;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import com.psilocke.riftbound.common.block.waystone.WaystoneCore;
 import com.psilocke.riftbound.common.block.waystone.WaystoneStoneBlock;
 import com.psilocke.riftbound.registry.ModBlocks;
 import com.psilocke.riftbound.registry.ModItems;
@@ -15,8 +11,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTDynamicOps;
-import net.minecraft.nbt.NBTUtil;
+import net.minecraft.state.properties.DoubleBlockHalf;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
@@ -29,14 +24,10 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 
 public class RiftPearlItem extends Item {
-	private static final Logger LOGGER = LogManager.getLogger();
 
 	public RiftPearlItem(Properties properties) {
 		super(properties);
 	}
-
-	
-	
 	
 	@Override
 	public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
@@ -60,12 +51,17 @@ public class RiftPearlItem extends Item {
 		if (!blockState.is(ModBlocks.WAYSTONE_BLOCK.get())) {
 			return ActionResultType.sidedSuccess(world.isClientSide);
 		} else {
-			if(blockState.getValue(WaystoneStoneBlock.SLOT_FILLED)) {
+			if(blockState.getValue(WaystoneCore.SLOT_FILLED)) {
+				if(blockState.getValue(WaystoneCore.HALF)==DoubleBlockHalf.UPPER) {
+					clickedPos = clickedPos.below();
+					world.getBlockState(clickedPos);
+				}
+				
 				world.playSound((PlayerEntity) null, clickedPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundCategory.PLAYERS, 1.0F, 1.0F);
 				
 				ItemStack itemstack1 = new ItemStack(ModItems.RIFT_PEARL.get(), 1);
 				CompoundNBT compoundnbt = itemstack.hasTag() ? itemstack.getTag().copy() : new CompoundNBT();
-				compoundnbt = addLinkedPositionTags(world.dimension(), clickedPos);
+				compoundnbt = compilelinkedPosition(world.dimension(), clickedPos);
 				itemstack1.setTag(compoundnbt);
 				itemstack.shrink(1);
 
@@ -77,7 +73,7 @@ public class RiftPearlItem extends Item {
 		}
 	}
 	
-	public static CompoundNBT addLinkedPositionTags(RegistryKey<World> world, BlockPos clickedPos) {
+	public static CompoundNBT compilelinkedPosition(RegistryKey<World> world, BlockPos clickedPos) {
 		CompoundNBT nbt = new CompoundNBT();
 		nbt.putDouble("LinkedX", clickedPos.getX());
 		nbt.putDouble("LinkedY", clickedPos.getY());
