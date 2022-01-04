@@ -131,7 +131,7 @@ public class MonolithCore extends Block {
 			MonolithCoreTileEntity refMonolith = ((MonolithCoreTileEntity)world.getBlockEntity(linkedPos));
 			ItemStack itemstack = refMonolith.getSlot();
 			
-			CompoundNBT compoundnbt = RiftPearlItem.addLinkedPositionTags(world.dimension(), clickedPos);
+			CompoundNBT compoundnbt = RiftPearlItem.compilelinkedPosition(world.dimension(), clickedPos);
 			itemstack.setTag(compoundnbt);
 			
 			refMonolith.setSlot(itemstack);
