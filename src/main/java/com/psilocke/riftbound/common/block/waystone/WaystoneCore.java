@@ -15,6 +15,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.IWaterLoggable;
+import net.minecraft.block.RespawnAnchorBlock;
 import net.minecraft.block.material.PushReaction;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -154,6 +155,9 @@ public class WaystoneCore extends MonolithCore implements IWaterLoggable, ITileE
 	
 	@Override
 	public boolean hasTileEntity(BlockState state) {
+		if(state.getValue(HALF)==DoubleBlockHalf.LOWER) {
+			return true;
+		}
 		return super.hasTileEntity(state);
 	}
 
@@ -234,7 +238,7 @@ public class WaystoneCore extends MonolithCore implements IWaterLoggable, ITileE
 		
 		ActionResultType result = super.use(state, world, clickedPos, player, hand, rayTrace);
 		
-		if(result == ActionResultType.PASS) {
+		if(result == ActionResultType.SUCCESS) {
 			teleport(player, clickedPos, world);
 		}
 		
@@ -246,32 +250,17 @@ public class WaystoneCore extends MonolithCore implements IWaterLoggable, ITileE
 		if (RiftPearlItem.isLinked(itemStack)) {
 			if(RiftPearlItem.getDimension(itemStack).matches(world.dimension().getRegistryName().getNamespace())) {
 				BlockPos tpPos = RiftPearlItem.getLinkedPosition(itemStack);
-				int x = tpPos.getX();
-				int y = tpPos.getY();
-				int z = tpPos.getZ();
+				Vector3d standPos = RespawnAnchorBlock.findStandUpPosition(player.getType(), world, tpPos).orElseGet(() -> {
+		               BlockPos blockpos = clickedPos.above();
+		               return new Vector3d((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.1D, (double)blockpos.getZ() + 0.5D);
+		            });
+				double x = standPos.x;
+				double y = standPos.y;
+				double z = standPos.z;
 				player.teleportTo(x, y, z);
 				player.sendMessage(new StringTextComponent("Teleport Success."), Util.NIL_UUID);
 			}else player.sendMessage(new StringTextComponent("Cannot Teleport Between Dimensions."), Util.NIL_UUID);
 		} else player.sendMessage(new StringTextComponent("Not Linked."), Util.NIL_UUID);
-	}
-	
-	public static Optional<Vector3d> findStandUpPosition(EntityType<?> entity, ICollisionReader reader, BlockPos pos) {
-		Optional<Vector3d> optional = findStandUpPosition(entity, reader, pos, true);
-		return optional.isPresent() ? optional : findStandUpPosition(entity, reader, pos, false);
-	}
-
-	private static Optional<Vector3d> findStandUpPosition(EntityType<?> entity, ICollisionReader reader, BlockPos pos, boolean bool) {
-		BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
-
-		for (Vector3i vector3i : RESPAWN_OFFSETS) {
-			blockpos$mutable.set(pos).move(vector3i);
-			Vector3d vector3d = TransportationHelper.findSafeDismountLocation(entity, reader, blockpos$mutable, bool);
-			if (vector3d != null) {
-				return Optional.of(vector3d);
-			}
-		}
-
-		return Optional.empty();
 	}
 
 }
