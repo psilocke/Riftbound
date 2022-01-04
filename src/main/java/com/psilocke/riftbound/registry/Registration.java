@@ -23,7 +23,7 @@ public class Registration {
 	public static final DeferredRegister<TileEntityType<?>> TILE_ENTITIES = create(ForgeRegistries.TILE_ENTITIES);
 	public static final DeferredRegister<EntityType<?>> ENTITIES = create(ForgeRegistries.ENTITIES);
 
-	public static final ItemGroup MOD_CREATIVE_TAB = (new ItemGroup(-1, "armoryreforged_tab") {
+	public static final ItemGroup MOD_CREATIVE_TAB = (new ItemGroup(-1, "tab_riftbound") {
 		public ItemStack makeIcon() {
 			return new ItemStack(ModItems.EVERLASTING_ENDER_PEARL.get());
 		}
