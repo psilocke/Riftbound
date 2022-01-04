@@ -2,8 +2,8 @@ package com.psilocke.riftbound.datagen;
 
 import java.util.function.Consumer;
 
-import com.psilocke.riftbound.build.ModBlocks;
-import com.psilocke.riftbound.build.ModItems;
+import com.psilocke.riftbound.registry.ModBlocks;
+import com.psilocke.riftbound.registry.ModItems;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.data.DataGenerator;

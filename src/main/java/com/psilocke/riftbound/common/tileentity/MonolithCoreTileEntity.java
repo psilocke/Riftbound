@@ -1,6 +1,6 @@
 package com.psilocke.riftbound.common.tileentity;
 
-import com.psilocke.riftbound.build.ModTileEntityTypes;
+import com.psilocke.riftbound.registry.ModTileEntityTypes;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;

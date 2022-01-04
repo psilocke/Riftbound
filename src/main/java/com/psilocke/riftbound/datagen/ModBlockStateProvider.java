@@ -1,8 +1,8 @@
 package com.psilocke.riftbound.datagen;
 
 import com.psilocke.riftbound.Riftbound;
-import com.psilocke.riftbound.build.ModBlocks;
 import com.psilocke.riftbound.common.block.waystone.WaystoneStoneBlock;
+import com.psilocke.riftbound.registry.ModBlocks;
 
 import net.minecraft.data.DataGenerator;
 import net.minecraft.state.properties.DoubleBlockHalf;

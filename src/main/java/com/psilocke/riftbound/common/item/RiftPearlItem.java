@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.psilocke.riftbound.build.ModBlocks;
-import com.psilocke.riftbound.build.ModItems;
 import com.psilocke.riftbound.common.block.waystone.WaystoneStoneBlock;
+import com.psilocke.riftbound.registry.ModBlocks;
+import com.psilocke.riftbound.registry.ModItems;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;

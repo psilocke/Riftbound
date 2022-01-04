@@ -1,6 +1,6 @@
 package com.psilocke.riftbound.client.render;
 
-import com.psilocke.riftbound.build.ModEntityTypes;
+import com.psilocke.riftbound.registry.ModEntityTypes;
 
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;

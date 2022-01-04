@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import com.psilocke.riftbound.build.ModBlocks;
-import com.psilocke.riftbound.build.Registration;
 import com.psilocke.riftbound.common.block.waystone.WaystoneStoneBlock;
+import com.psilocke.riftbound.registry.ModBlocks;
+import com.psilocke.riftbound.registry.Registration;
 
 import net.minecraft.block.Block;
 import net.minecraft.data.DataGenerator;

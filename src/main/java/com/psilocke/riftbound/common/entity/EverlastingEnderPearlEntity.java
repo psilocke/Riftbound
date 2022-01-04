@@ -2,8 +2,8 @@ package com.psilocke.riftbound.common.entity;
 
 import javax.annotation.Nullable;
 
-import com.psilocke.riftbound.build.ModEntityTypes;
-import com.psilocke.riftbound.build.ModItems;
+import com.psilocke.riftbound.registry.ModEntityTypes;
+import com.psilocke.riftbound.registry.ModItems;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -44,7 +44,6 @@ public class EverlastingEnderPearlEntity extends ProjectileItemEntity {
 
 	protected void onHitEntity(EntityRayTraceResult hit) {
 		super.onHitEntity(hit);
-		hit.getEntity().hurt(DamageSource.thrown(this, this.getOwner()), 0.0F);
 	}
 
 	@SuppressWarnings("deprecation")

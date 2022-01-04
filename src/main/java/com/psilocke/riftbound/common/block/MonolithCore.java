@@ -1,8 +1,8 @@
 package com.psilocke.riftbound.common.block;
 
-import com.psilocke.riftbound.build.ModItems;
 import com.psilocke.riftbound.common.item.RiftPearlItem;
 import com.psilocke.riftbound.common.tileentity.MonolithCoreTileEntity;
+import com.psilocke.riftbound.registry.ModItems;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;

@@ -4,10 +4,10 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import com.psilocke.riftbound.build.ModItems;
 import com.psilocke.riftbound.common.block.MonolithCore;
 import com.psilocke.riftbound.common.item.RiftPearlItem;
 import com.psilocke.riftbound.common.tileentity.MonolithCoreTileEntity;
+import com.psilocke.riftbound.registry.ModItems;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
