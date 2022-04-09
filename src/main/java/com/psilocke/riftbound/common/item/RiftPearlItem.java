@@ -2,6 +2,7 @@ package com.psilocke.riftbound.common.item;
 
 import com.psilocke.riftbound.common.block.waystone.WaystoneCore;
 import com.psilocke.riftbound.common.block.waystone.WaystoneStoneBlock;
+import com.psilocke.riftbound.common.tileentity.MonolithCoreTileEntity;
 import com.psilocke.riftbound.registry.ModBlocks;
 import com.psilocke.riftbound.registry.ModItems;
 
@@ -31,11 +32,13 @@ public class RiftPearlItem extends Item {
 	
 	@Override
 	public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+		/*
 		if(!world.isClientSide) {
 			player.sendMessage(new StringTextComponent("Stored Pos: "+getLinkedPosition(player.getItemInHand(hand).getStack())), Util.NIL_UUID);
 			player.sendMessage(new StringTextComponent("Stored Dim: "+getDimension(player.getItemInHand(hand).getStack())), Util.NIL_UUID);
 			player.sendMessage(new StringTextComponent("Active Dim: "+world.dimension().getRegistryName().getNamespace()), Util.NIL_UUID);
 		}
+		*/
 		return super.use(world, player, hand);
 	}
 
@@ -43,34 +46,43 @@ public class RiftPearlItem extends Item {
 
 	@Override
 	public ActionResultType useOn(ItemUseContext context) {
+		/*
 		World world = context.getLevel();
 		BlockPos clickedPos = context.getClickedPos();
 		BlockState blockState = world.getBlockState(clickedPos);
-		PlayerEntity player = context.getPlayer();
-		ItemStack itemstack = context.getItemInHand();
+		ItemStack itemStack = context.getItemInHand();
 		if (!blockState.is(ModBlocks.WAYSTONE_BLOCK.get())) {
 			return ActionResultType.sidedSuccess(world.isClientSide);
 		} else {
 			if(blockState.getValue(WaystoneCore.SLOT_FILLED)) {
 				if(blockState.getValue(WaystoneCore.HALF)==DoubleBlockHalf.UPPER) {
 					clickedPos = clickedPos.below();
-					world.getBlockState(clickedPos);
+					blockState = world.getBlockState(clickedPos);
 				}
 				
 				world.playSound((PlayerEntity) null, clickedPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundCategory.PLAYERS, 1.0F, 1.0F);
 				
-				ItemStack itemstack1 = new ItemStack(ModItems.RIFT_PEARL.get(), 1);
-				CompoundNBT compoundnbt = itemstack.hasTag() ? itemstack.getTag().copy() : new CompoundNBT();
-				compoundnbt = compilelinkedPosition(world.dimension(), clickedPos);
-				itemstack1.setTag(compoundnbt);
-				itemstack.shrink(1);
-
-				if (!player.inventory.add(itemstack1)) {
-					player.drop(itemstack1, false);
-				}
+				linkPosition(world, clickedPos, itemStack);
 			}
 			return ActionResultType.sidedSuccess(world.isClientSide);
 		}
+		*/
+		return ActionResultType.sidedSuccess(context.getLevel().isClientSide);
+	}
+	
+	public static void linkPosition(World world, BlockPos clickedPos, ItemStack heldItem) {
+		ItemStack clickedPositionPearl = ((MonolithCoreTileEntity)world.getBlockEntity(clickedPos)).getSlot();
+		CompoundNBT clickedPearlNBT = clickedPositionPearl.getOrCreateTag();
+		if(clickedPearlNBT != null && !clickedPearlNBT.contains("uniqueIndex")) {
+			int uniqueIndex = (int) Math.round(Math.random()*100000);
+			
+			CompoundNBT heldItemNBT = compilelinkedPosition(world.dimension(), clickedPos);
+			heldItem.setTag(heldItemNBT);
+			heldItem.getTag().putInt("uniqueIndex", uniqueIndex);
+			
+			clickedPearlNBT.putInt("uniqueIndex", uniqueIndex);
+		}
+		
 	}
 	
 	public static CompoundNBT compilelinkedPosition(RegistryKey<World> world, BlockPos clickedPos) {
@@ -80,6 +92,13 @@ public class RiftPearlItem extends Item {
 		nbt.putDouble("LinkedZ", clickedPos.getZ());
 		nbt.putString("LinkedDimension", world.getRegistryName().getNamespace());
 		return nbt;
+	}
+	
+	public static int getUniqueIndex(ItemStack stack) {
+		CompoundNBT nbt = stack.getOrCreateTag();
+		if(nbt != null && nbt.contains("uniqueIndex")) {
+			return nbt.getInt("uniqueIndex");
+		}else return -1;
 	}
 	
 	public static BlockPos getLinkedPosition(ItemStack stack) {
