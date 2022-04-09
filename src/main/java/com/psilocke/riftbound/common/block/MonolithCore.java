@@ -27,11 +27,12 @@ import net.minecraft.world.World;
 
 public class MonolithCore extends Block {
 	
-	protected final static int SLOTTED = 0;
+	protected final static int SLOTTING = 0;
 	protected final static int UNSLOTTED = 1;
 	protected final static int INACTIVE = 2;
 	protected final static int ACTIVE = 3;
 	protected final static int LINK = 4;
+	protected final static int EJECT = 5;
 	protected final static int FAIL = -1;
 
     public final static BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -62,27 +63,32 @@ public class MonolithCore extends Block {
 	}
 	
 	@Override
-	public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
+	public ActionResultType use(BlockState state, World world, BlockPos clickedPos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
 		if(!world.isClientSide) {
-			switch(interactWith(world,state,pos,player)) {
+			switch(interactWith(world,state,clickedPos,player)) {
 				case ACTIVE:
+					player.sendMessage(new StringTextComponent("Activation Success."), Util.NIL_UUID);
 					return ActionResultType.SUCCESS;
 				case INACTIVE:
 					player.sendMessage(new StringTextComponent("Deactivated."), Util.NIL_UUID);
 					return ActionResultType.FAIL;
-				case SLOTTED:
-					setSlot(world, pos, (MonolithCoreTileEntity)world.getBlockEntity(pos), player);
+				case SLOTTING:
+					player.sendMessage(new StringTextComponent("Pearl Slotting."), Util.NIL_UUID);
+					setSlot(world, clickedPos, (MonolithCoreTileEntity)world.getBlockEntity(clickedPos), player);
 					return ActionResultType.CONSUME;
 				case UNSLOTTED:
-					player.sendMessage(new StringTextComponent("Insert a Rift Pearl to prime."), Util.NIL_UUID);
+					player.sendMessage(new StringTextComponent("Empty."), Util.NIL_UUID);
 					return ActionResultType.FAIL;
+				case EJECT:
+					player.sendMessage(new StringTextComponent("Ejecting."), Util.NIL_UUID);
+					dropRiftPearl(world, clickedPos, player);
+					return ActionResultType.CONSUME;
 				case LINK:
+					player.sendMessage(new StringTextComponent("Pearl Linking."), Util.NIL_UUID);
 					return ActionResultType.PASS;
 			}
-		}
-		if(world.isClientSide) {
-			return ActionResultType.SUCCESS;
-		}
+		}else return ActionResultType.SUCCESS;
+		
 		return ActionResultType.CONSUME;
 	}
 	
@@ -92,7 +98,7 @@ public class MonolithCore extends Block {
 			boolean playerHoldingPearl = player.getMainHandItem().getItem() == ModItems.RIFT_PEARL.get();
 			if(state.getValue(SLOT_FILLED)) {
 				if(player.isCrouching()) {
-					dropRiftPearl(world, clickedPos, player);
+					return EJECT;
 				}else if(!playerHoldingPearl) {
 					if(!state.getValue(POWERED)) {
 						return ACTIVE;
@@ -104,7 +110,7 @@ public class MonolithCore extends Block {
 				if(!playerHoldingPearl) {
 					return UNSLOTTED;
 				}else {
-					return SLOTTED;
+					return SLOTTING;
 				}
 			}
 		}
@@ -112,44 +118,47 @@ public class MonolithCore extends Block {
 	}
 	
 	protected void setSlot(World world, BlockPos clickedPos, MonolithCoreTileEntity monolith, PlayerEntity player) {
-		if(monolith.setSlot(player.getMainHandItem())) {
-			if(!world.isClientSide) {
-				player.getMainHandItem().shrink(1);
+		ItemStack item = player.getMainHandItem();
+		if(item.getItem() instanceof RiftPearlItem) {
+			if(monolith.setSlot(item)) {
+				if(!world.isClientSide) {
+					player.getMainHandItem().shrink(1);
+				}
+				if(monolith.getSlot() != ItemStack.EMPTY) {
+					player.sendMessage(new StringTextComponent("Rift Pearl Slotted."), Util.NIL_UUID);
+					world.setBlockAndUpdate(clickedPos, world.getBlockState(clickedPos).setValue(SLOT_FILLED, true));
+				}
+				syncSlot(world, monolith, clickedPos);
 			}
-			if(monolith.getSlot() != ItemStack.EMPTY) {
-				player.sendMessage(new StringTextComponent("Rift Pearl Slotted."), Util.NIL_UUID);
-				world.setBlockAndUpdate(clickedPos, world.getBlockState(clickedPos).setValue(SLOT_FILLED, true));
-			}
-			syncSlot(world, monolith, clickedPos);
 		}
 	}
 	
 	private void syncSlot(World world, MonolithCoreTileEntity monolith, BlockPos clickedPos) {
 		BlockPos linkedPos = RiftPearlItem.getLinkedPosition(monolith.getSlot());
+		int uniqueIndex = RiftPearlItem.getUniqueIndex(monolith.getSlot());
 		
 		if(world.getBlockState(linkedPos).is(this)) {
 			MonolithCoreTileEntity refMonolith = ((MonolithCoreTileEntity)world.getBlockEntity(linkedPos));
 			ItemStack itemstack = refMonolith.getSlot();
 			
-			CompoundNBT compoundnbt = RiftPearlItem.compilelinkedPosition(world.dimension(), clickedPos);
-			itemstack.setTag(compoundnbt);
-			
-			refMonolith.setSlot(itemstack);
+			if(RiftPearlItem.getUniqueIndex(itemstack) == uniqueIndex) {
+				CompoundNBT compoundnbt = RiftPearlItem.compilelinkedPosition(world.dimension(), clickedPos);
+				itemstack.setTag(compoundnbt);
+				
+				refMonolith.setSlot(itemstack);
+			}
 		}
 	}
 
 	protected void dropRiftPearl(World world, BlockPos pos, PlayerEntity player) {
-		if(!world.isClientSide) {
-			TileEntity tileentity = world.getBlockEntity(pos);
-			if (tileentity instanceof MonolithCoreTileEntity) {
-				MonolithCoreTileEntity monolith = (MonolithCoreTileEntity) tileentity;
-				if(world.addFreshEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), monolith.getSlot()))) {
-					player.sendMessage(new StringTextComponent("Rift Pearl Ejected."), Util.NIL_UUID);
-					//monolith.clearContent();
-					world.setBlockAndUpdate(pos, world.getBlockState(pos).setValue(SLOT_FILLED, false));
-				}
+		TileEntity tileentity = world.getBlockEntity(pos);
+		if (tileentity instanceof MonolithCoreTileEntity) {
+			MonolithCoreTileEntity monolith = (MonolithCoreTileEntity) tileentity;
+			if(world.addFreshEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), monolith.getSlot()))) {
+				monolith.clearContent();
+				world.setBlockAndUpdate(pos, world.getBlockState(pos).setValue(SLOT_FILLED, false));
+				player.sendMessage(new StringTextComponent("Ejected."), Util.NIL_UUID);
 			}
-			
 		}
 	}
 
